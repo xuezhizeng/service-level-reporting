@@ -1,7 +1,7 @@
 awesome-slugify
 clickclick
 connexion==1.1.4
-gevent
+gevent==1.2.2
 psycogreen
 psycopg2
 stups-zign
