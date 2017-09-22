@@ -1,9 +1,7 @@
 import connexion
-from connexion import NoContent
-from psycopg2 import IntegrityError
 
 from app.db import dbconn
-from app.utils import strip_column_prefix, slugger
+from app.utils import strip_column_prefix
 
 
 def get():
@@ -16,23 +14,12 @@ def get():
 
 
 def add(product_group):
-    with dbconn() as conn:
-        cur = conn.cursor()
-        try:
-            cur.execute('''INSERT INTO zsm_data.product_group (pg_name, pg_department, pg_slug) VALUES (%s, %s, %s)''',
-                        (product_group['name'], product_group['department'], slugger(product_group['name'])))
-            conn.commit()
-            cur.close()
-            return NoContent, 201
-        except IntegrityError:
-            return connexion.problem(status=400, title='Product Group already exists',
-                                     detail='Product group with name: "{}" already exists!'.format(
-                                         product_group['name']))
+    return connexion.problem(
+        status=403, title='Forbidden',
+        detail='You are using legacy Service level reporting. Editing/Deleting resources is no longer allowed!')
 
 
 def delete(pg_slug: str):
-    with dbconn() as conn:
-        cur = conn.cursor()
-        cur.execute('''DELETE FROM zsm_data.product_group WHERE pg_slug = %s''', (pg_slug,))
-        conn.commit()
-        return (NoContent, 404) if not cur.rowcount else (NoContent, 200)
+    return connexion.problem(
+        status=403, title='Forbidden',
+        detail='You are using legacy Service level reporting. Editing/Deleting resources is no longer allowed!')

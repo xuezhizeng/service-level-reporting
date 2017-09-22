@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+import connexion
 from connexion import ProblemException
 
 from app.db import dbconn, database_uri
@@ -28,19 +29,9 @@ def run_sli_update():
 
 
 def update_service_level_objectives(product):
-    with dbconn() as conn:
-        cur = conn.cursor()
-        cur.execute('''SELECT f.sli_name AS sli_name, seconds_ago  FROM zsm_data.service_level_indicators_full AS f
-                      LEFT OUTER JOIN zsm_data.sli_latest_data AS l ON f.sli_name=l.sli_name AND f.p_id=l.p_id
-                      WHERE f.p_slug = %s''', (product,))
-        rows = cur.fetchall()
-    res = {}
-    for row in rows:
-        start_time = ((row.seconds_ago // 60) + 5) if row.seconds_ago else MAX_QUERY_TIME_SLICE
-        res[row.sli_name] = {'start': start_time}
-        response = post_update(product, row.sli_name, res[row.sli_name])
-        res[row.sli_name]['count'] = response['count']
-    return res
+    return connexion.problem(
+        status=403, title='Forbidden',
+        detail='You are using legacy Service level reporting. Editing/Deleting resources is no longer allowed!')
 
 
 def post_update(product, name, body):

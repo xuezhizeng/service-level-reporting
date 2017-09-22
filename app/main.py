@@ -13,7 +13,6 @@ from decimal import Decimal
 
 import connexion
 from connexion.decorators.produces import JSONEncoder
-from app.handler.updater import run_sli_update
 
 
 class DecimalEncoder(JSONEncoder):
@@ -35,7 +34,6 @@ application = app.app
 
 
 def run():
-    gevent.spawn(run_sli_update)
     # run our standalone gevent server
     app.run(port=8080, server='gevent')
 

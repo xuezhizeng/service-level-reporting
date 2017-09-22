@@ -1,4 +1,4 @@
-from connexion import NoContent
+import connexion
 
 from app.db import dbconn
 from app.utils import strip_column_prefix
@@ -26,24 +26,12 @@ def get(product):
 
 
 def add(product, slo):
-    with dbconn() as conn:
-        cur = conn.cursor()
-        cur.execute('INSERT INTO zsm_data.service_level_objective (slo_title, slo_product_id) '
-                    'VALUES (%s, (SELECT p_id FROM zsm_data.product WHERE p_slug= %s)) RETURNING slo_id',
-                    (slo['title'], product))
-        slo_id = cur.fetchone()[0]
-        for t in slo['targets']:
-            cur.execute('INSERT INTO zsm_data.service_level_indicator_target '
-                        '(slit_slo_id,slit_sli_name,slit_unit,slit_from,slit_to)'
-                        'VALUES (%s, %s, %s, %s, %s)', (slo_id, t['sli_name'], t['unit'], t.get('from'), t.get('to')))
-        conn.commit()
-        return NoContent, 201
+    return connexion.problem(
+        status=403, title='Forbidden',
+        detail='You are using legacy Service level reporting. Editing/Deleting resources is no longer allowed!')
 
 
 def delete(slo_id):
-    with dbconn() as conn:
-        cur = conn.cursor()
-        cur.execute('''DELETE FROM zsm_data.service_level_indicator_target WHERE slit_slo_id = %s''', (slo_id,))
-        cur.execute('''DELETE FROM zsm_data.service_level_objective WHERE slo_id = %s''', (slo_id,))
-        conn.commit()
-        return (NoContent, 204,) if cur.rowcount else (NoContent, 404,)
+    return connexion.problem(
+        status=403, title='Forbidden',
+        detail='You are using legacy Service level reporting. Editing/Deleting resources is no longer allowed!')
