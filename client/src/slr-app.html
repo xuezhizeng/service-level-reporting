@@ -216,8 +216,8 @@
           loading="{{loading}}"
           search-str="{{searchStr}}"></slr-products>
 
-        <slr-slr name="slr" route="{{subroute}}"></slr-slr>
-
+<!--         <slr-slr name="slr" route="{{subroute}}"></slr-slr>
+ -->
         <slr-reports name="reports"></slr-reports>
 
         <slr-auth name="auth"></slr-auth>
@@ -286,12 +286,21 @@
             computed: 'computeSearchIsHidden(routeData.page, small)'
           },
           session: {
-            type: Object
+            type: Object,
+            observer: 'sessionChanged'
           },
           small: {
             type: Boolean
           }
         }
+      }
+
+      sessionChanged() {
+        console.log('session changed', this.session)
+        Raven.setUserContext({
+            email: 'demouser@example.com',
+            username: 'demouser'
+        })
       }
 
       computeSearchIsHidden(page, small) {
@@ -341,6 +350,14 @@
         this.addEventListener('slr-notify', (n) => this.$.notif.open(n.detail))
         this.addEventListener('slr-error', () => this.showError())
         this.$.searchSmall.addEventListener('search-closed', () => this.$.searchBar.hidden = true)
+
+        try {
+          console.log('try')
+          JSON.parse('/')
+        } catch (e) {
+          console.log('catch', e)
+          Raven.captureException(e);
+        }
       }
 
       pageLoaded() {

@@ -166,10 +166,12 @@
            this.notify(`Can't ${m[method]} Product Group.`,
              () => this.$.form.submit(),
              e.detail.request.xhr.response.detail)
+             Raven.captureException(e.detail.request.xhr.response.detail);
          }
        } catch(e) {
          this.notify(`Can't ${m[method]} Product Group.`,
            () => this.$.form.submit())
+         Raven.captureException(e);
        }
 
        this.initForm()
@@ -223,8 +225,12 @@
       }
 
       submit() {
-        if (!this.$.form.validate()) {
-          return
+        try {
+          if (!this.$.form.validate()) {
+            return
+          }
+        } catch(e) {
+          Raven.captureException(e);
         }
         this.$.form.submit()
       }
